@@ -579,7 +579,7 @@ export default {
   'Split Pk Column': 'Split Pk Column',
   'Please be sure the source columns is not null':'Please be sure the source columns is not null',
   'Please be sure the target columns is not null':'Please be sure the target columns is not null',
-  'This cloumn type must be integral type':'This cloumn type must be integral type!',
+  'This column type must be integral type':'This column type must be integral type!',
   'Please choose a SplitPk Column(required)':'Please choose a SplitPk Column(required)',
   'If you use SplitPk,please be sure the number of job channel is bigger than 1':'If you use SplitPk,please be sure the number of job channel is bigger than 1',
   TargetDataBase: 'target database',

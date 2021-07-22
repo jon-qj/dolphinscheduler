@@ -580,7 +580,7 @@ export default {
   'Please be sure the source columns is not null':'请确认源列非空',
   'Please be sure the target columns is not null':'请确认目标列非空',
 
-  'This cloumn type must be integral type':'该列类型必须是整型!',
+  'This column type must be integral type':'该列类型必须是整型!',
   'Please choose a SplitPk Column(required)':'请选择切分列',
   'If you use SplitPk,please be sure the number of job channel is bigger than 1':'如果设置切分主键，确保任务并发数大于1',
   TargetDataBase: '目标库',

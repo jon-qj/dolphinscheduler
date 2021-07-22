@@ -278,7 +278,7 @@
                 :label="city.name">
               </x-option>
             </x-select>
-            <span>({{$t('This cloumn type must be integral type')}})</span>
+            <span>({{$t('This column type must be integral type')}})</span>
           </div>
         </m-list-box>
         <m-list-box>
@@ -555,7 +555,7 @@
       _checkIntegralType(type){
         const index = integralType.indexOf(type)
         if(index === -1){
-          this.$message.error(`${i18n.$t('This cloumn type must be integral type')}`)
+          this.$message.error(`${i18n.$t('This column type must be integral type')}`)
           this.splitPk =''
           this.$refs.clearSelect.setSelected('')
           return false
