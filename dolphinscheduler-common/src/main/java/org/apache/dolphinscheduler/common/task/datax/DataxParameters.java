@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.dolphinscheduler.common.enums.Flag;
+import org.apache.dolphinscheduler.common.process.Column;
 import org.apache.dolphinscheduler.common.process.ResourceInfo;
 import org.apache.dolphinscheduler.common.task.AbstractParameters;
 
@@ -88,6 +89,46 @@ public class DataxParameters extends AbstractParameters {
      * speed record count
      */
     private int jobSpeedRecord;
+
+    /**
+     * start using splitPk
+     */
+    private boolean isSplit;
+
+    /**
+     * splitPk
+     */
+    private String splitPk;
+
+    /**
+     * the columns of target table
+     */
+    private List<Column> targetColumns;
+
+    /**
+     * job speed channel
+     */
+    private int jobSpeedChannel;
+
+    /**
+     * batch size
+     */
+    private int batchSize;
+
+    /**
+     * use sql
+     */
+    private boolean isDataxSqlStatement;
+
+    /**
+     * source table
+     */
+    private String sourceTable;
+
+    /**
+     * source columns
+     */
+    private List<Column> sourceColumns;
 
     public int getCustomConfig() {
         return customConfig;
@@ -185,13 +226,86 @@ public class DataxParameters extends AbstractParameters {
         this.jobSpeedRecord = jobSpeedRecord;
     }
 
+    public boolean isSplit() {
+        return isSplit;
+    }
+
+    public void setIsSplit(boolean isSplit) {
+        this.isSplit = isSplit;
+    }
+
+    public String getSplitPk() {
+        return splitPk;
+    }
+
+    public void setSplitPk(String splitPk) {
+        this.splitPk = splitPk;
+    }
+
+    public List<Column> getTargetColumns() {
+        return targetColumns;
+    }
+
+    public void setTargetColumns(List<Column> targetColumns) {
+        this.targetColumns = targetColumns;
+    }
+
+    public int getJobSpeedChannel() {
+        return jobSpeedChannel;
+    }
+
+    public void setJobSpeedChannel(int jobSpeedChannel) {
+        this.jobSpeedChannel = jobSpeedChannel;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
+
+    public boolean isDataxSqlStatement() {
+        return isDataxSqlStatement;
+    }
+
+    public void setIsDataxSqlStatement(boolean isDataxSqlStatement) {
+        this.isDataxSqlStatement = isDataxSqlStatement;
+    }
+
+    public String getSourceTable() {
+        return sourceTable;
+    }
+
+    public void setSourceTable(String sourceTable) {
+        this.sourceTable = sourceTable;
+    }
+
+    public List<Column> getSourceColumns() {
+        return sourceColumns;
+    }
+
+    public void setSourceColumns(List<Column> sourceColumns) {
+        this.sourceColumns = sourceColumns;
+    }
+
     @Override
     public boolean checkParameters() {
         if (customConfig == Flag.NO.ordinal()) {
-            return dataSource != 0
-                    && dataTarget != 0
-                    && StringUtils.isNotEmpty(sql)
-                    && StringUtils.isNotEmpty(targetTable);
+            if(isDataxSqlStatement){
+                return dataSource != 0
+                        && dataTarget != 0
+                        && StringUtils.isNotEmpty(sql)
+                        && StringUtils.isNotEmpty(targetTable);
+            }else{
+                return dataSource != 0
+                        && dataTarget != 0
+                        && StringUtils.isNotEmpty(sourceColumns.toString())
+                        && StringUtils.isNotEmpty(sourceTable)
+                        && StringUtils.isNotEmpty(targetColumns.toString())
+                        && StringUtils.isNotEmpty(targetTable);
+            }
         } else {
             return StringUtils.isNotEmpty(json);
         }
@@ -217,6 +331,14 @@ public class DataxParameters extends AbstractParameters {
                 ", postStatements=" + postStatements +
                 ", jobSpeedByte=" + jobSpeedByte +
                 ", jobSpeedRecord=" + jobSpeedRecord +
+                ", isSplit=" + isSplit +
+                ", splitPk=" + splitPk +
+                ", targetColumns=" + targetColumns +
+                ", jobSpeedChannel=" + jobSpeedChannel +
+                ", batchSize=" + batchSize +
+                ", isDataxSqlStatement=" + isDataxSqlStatement +
+                ", sourceTable=" + sourceTable +
+                ", sourceColumns=" + sourceColumns +
                 '}';
     }
 }

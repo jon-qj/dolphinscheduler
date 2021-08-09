@@ -38,18 +38,62 @@
           </m-datasource>
         </div>
       </m-list-box>
+
       <m-list-box>
-        <div slot="text">{{$t('SQL Statement')}}</div>
+        <div slot="text">{{$t('Use SQL Statement')}}</div>
         <div slot="content">
-          <div class="form-mirror">
+          <label class="label-box">
+            <div style="padding-top: 5px;">
+              <x-switch v-model="isDataxSqlStatement" @on-click="_onDataxSqlStatementSwitch" :disabled="isDetails"></x-switch>
+            </div>
+          </label>
+        </div>
+      </m-list-box>
+
+      <div v-if="isDataxSqlStatement">
+        <m-list-box>
+          <div slot="text">{{$t('SQL Statement')}}</div>
+          <div slot="content">
+            <div class="form-mirror">
             <textarea
               id="code-sql-mirror"
               name="code-sql-mirror"
               style="opacity: 0;">
             </textarea>
+            </div>
           </div>
-        </div>
-      </m-list-box>
+        </m-list-box>
+      </div>
+
+      <div v-else>
+        <m-list-box>
+          <div slot="text">{{$t('SourceTable')}}</div>
+          <div slot="content">
+            <x-input
+              type="input"
+              :disabled="isDetails"
+              v-model="sourceTable"
+              :placeholder="$t('Please enter the table of source')"
+              autocomplete="off">
+            </x-input>
+          </div>
+        </m-list-box>
+        <m-list-box>
+          <div slot="text">{{$t('SourceColumn')}}</div>
+          <div slot="content">
+            <m-local-columns
+              ref="refSourceColumns"
+              @on-local-columns="_onLocalSourceColumns"
+              :udp-list="sourceColumns"
+              :data-source="rtDatasource"
+              :data-table="sourceTable"
+              :hide="true">
+            </m-local-columns>
+          </div>
+        </m-list-box>
+      </div>
+
+
       <m-list-box>
         <div slot="text">{{$t('TargetDataBase')}}</div>
         <div slot="content">
@@ -66,12 +110,30 @@
         <div slot="content">
           <x-input
             type="input"
+            :disabled="isDetails"
             v-model="targetTable"
             :placeholder="$t('Please enter the table of target')"
             autocomplete="off">
           </x-input>
         </div>
       </m-list-box>
+
+      <div v-if="!isDataxSqlStatement">
+        <m-list-box>
+          <div slot="text">{{$t('TargetColumn')}}</div>
+          <div slot="content">
+            <m-local-columns
+              ref="refTargetColumns"
+              @on-local-columns="_onLocalTargetColumns"
+              :udp-list="targetColumns"
+              :data-source="rtDatatarget"
+              :data-table="targetTable"
+              :hide="true">
+            </m-local-columns>
+          </div>
+        </m-list-box>
+      </div>
+
       <m-list-box>
         <div slot="text">{{$t('TargetDataBase')}}{{$t('Pre Statement')}}</div>
         <div slot="content">
@@ -92,6 +154,61 @@
           </m-statement-list>
         </div>
       </m-list-box>
+
+      <div v-if="!isDataxSqlStatement">
+        <m-list-box>
+          <div slot="text">{{$t('Use SplitPk')}}</div>
+          <div slot="content">
+            <label class="label-box">
+              <div style="padding-top: 5px;">
+                <x-switch v-model="isSplit" @on-click="_onDataxSplitPkSwitch" :disabled="isDetails"></x-switch>
+              </div>
+            </label>
+          </div>
+        </m-list-box>
+        <div v-if="isSplit">
+          <m-list-box>
+            <div slot="text">{{$t('SplitPk Column')}}</div>
+            <div slot="content">
+              <x-select ref="clearDataxSelect"
+                        style="width: 160px;"
+                        :disabled="isDetails"
+                        @on-change="_onDataxSplitPkChange"
+                        v-model="splitPk">
+                <x-option
+                  v-for="city in sourceColumns"
+                  :key="city.name"
+                  :value="city.name"
+                  :label="city.name">
+                </x-option>
+              </x-select>
+              <span>({{$t('This column type must be integral type')}})</span>
+            </div>
+          </m-list-box>
+          <m-list-box>
+            <div slot="text">
+              <span>{{$t('SpeedChannel')}}</span>
+            </div>
+            <div slot="content">
+              <m-select-input v-model="jobSpeedChannel" :list="[1,2,3,5,8,10]">
+              </m-select-input>
+            </div>
+          </m-list-box>
+        </div>
+      </div>
+
+      <m-list-box>
+        <div slot="text">
+          <span>{{$t('Batch Size')}}</span>
+        </div>
+        <div slot="content">
+          <m-select-input v-model="batchSize" :list="[1,1024,2048,4096,8192,16394]">
+          </m-select-input>
+          <span>({{$t('1 means unlimited')}})</span>
+        </div>
+      </m-list-box>
+
+
       <m-list-box>
         <div slot="text">
           <span>{{$t('SpeedByte')}}</span>
@@ -146,10 +263,12 @@
   import mListBox from './_source/listBox'
   import mDatasource from './_source/datasource'
   import mLocalParams from './_source/localParams'
+  import mLocalColumns from './_source/localColumns'
   import mStatementList from './_source/statementList'
   import disabledState from '@/module/mixin/disabledState'
   import mSelectInput from '../_source/selectInput'
   import codemirror from '@/conf/home/pages/resource/pages/file/pages/_source/codemirror'
+  import { integralType } from './_source/commcon'
 
   let editor
   let jsonEditor
@@ -189,6 +308,14 @@
         // Custom parameter
         localParams: [],
         customConfig: 0,
+        isSplit: false,
+        splitPk: '',
+        targetColumns: [],
+        jobSpeedChannel: 1,
+        batchSize: 1024,
+        isDataxSqlStatement: false,
+        sourceTable: '',
+        sourceColumns: []
       }
     },
     mixins: [disabledState],
@@ -205,11 +332,90 @@
           }, 200)
         } else {
           this.customConfig = 0
-          setTimeout(() => {
-            this._handlerEditor()
-          }, 350)
+          if(this.isDataxSqlStatement){
+            setTimeout(() => {
+              this._handlerEditor()
+            }, 250)
+          }
         }
       },
+
+      _onDataxSqlStatementSwitch:_.debounce(function (is){
+        this.sourceTable=''
+        this.sourceColumns=[]
+        this.targetColumns=[]
+        this.isDataxSqlStatement = is
+        if(is){
+          setTimeout(() => {
+            this._handlerEditor()
+          }, 200)
+        }else {
+          this._destroyEditor()
+        }
+        this._onDataxSplitPkSwitch(false)
+      },600),
+
+      _checkColumns(){
+        if(!this.isDataxSqlStatement){
+          if(_.isEmpty(this.sourceColumns)){
+            this.$message.warning(`${i18n.$t('Please be sure the source columns is not null')}`)
+            return false
+          }
+          if(_.isEmpty(this.targetColumns)){
+            this.$message.warning(`${i18n.$t('Please be sure the target columns is not null')}`)
+            return false
+          }
+        }
+        return true
+      },
+
+      _checkDataxIntegralType(type){
+        const index = integralType.indexOf(type)
+        if(index === -1){
+          this.$message.error(`${i18n.$t('This column type must be integral type')}`)
+          this.splitPk =''
+          this.$refs.clearDataxSelect.setSelected('')
+          return false
+        }else {
+          return true
+        }
+      },
+
+      _onDataxSplitPkSwitch(is){
+        if(is){
+          this._checkColumns()
+        }
+        this.isSplit = is
+        if(!is){
+          this.splitPk = ''
+          this.jobSpeedChannel = 1
+        }
+      },
+
+      _onDataxSplitPkChange(val){
+        const arr = this.targetColumns
+        if(!_.isEmpty(val)){
+          const label = val['label']
+          arr.filter((item,index)=>{
+            if(item['name']===label){
+              if(this._checkDataxIntegralType(item['type'])){
+                this.splitPk = val['label']
+              }
+              return true
+            }
+            return false
+          })
+        }
+      },
+
+      _onLocalSourceColumns(a){
+        this.sourceColumns = a
+      },
+
+      _onLocalTargetColumns(a){
+        this.targetColumns = a
+      },
+
       /**
        * return data source
        */
@@ -265,9 +471,16 @@
           })
           return true
         } else {
-          if (!editor.getValue()) {
-            this.$message.warning(`${i18n.$t('Please enter a SQL Statement(required)')}`)
-            return false
+          if(this.isDataxSqlStatement){
+            if (!editor.getValue()) {
+              this.$message.warning(`${i18n.$t('Please enter a SQL Statement(required)')}`)
+              return false
+            }
+          }else {
+            if (!this.sourceTable) {
+              this.$message.warning(`${i18n.$t('Please enter a Source Table(required)')}`)
+              return false
+            }
           }
 
           // datasource Subcomponent verification
@@ -294,6 +507,27 @@
           if (!this.$refs.refPostStatements._verifProp()) {
             return false
           }
+          if(!this._checkColumns()){
+            return false
+          }
+
+          if(!this.isDataxSqlStatement){
+            if(this.isSplit){
+              if(!this.splitPk){
+                this.$message.warning(`${i18n.$t('Please choose a SplitPk Column(required)')}`)
+                return false
+              }
+              if(this.jobSpeedChannel<=1){
+                this.$message.warning(`${i18n.$t('If you use SplitPk,please be sure the job channel is bigger than 1')}`)
+                return false
+              }
+            }
+          }
+
+          if(this.batchSize<1){
+            this.$message.warning(`${i18n.$t('Please be sure the batch size is not smaller than 1')}`)
+            return false
+          }
 
           // storage
           this.$emit('on-params', {
@@ -302,12 +536,20 @@
             dataSource: this.rtDatasource,
             dtType: this.dtType,
             dataTarget: this.rtDatatarget,
-            sql: editor.getValue(),
+            sql: editor?editor.getValue():'',
             targetTable: this.targetTable,
             jobSpeedByte: this.jobSpeedByte * 1024,
             jobSpeedRecord: this.jobSpeedRecord,
             preStatements: this.preStatements,
-            postStatements: this.postStatements
+            postStatements: this.postStatements,
+            isSplit: this.isSplit,
+            splitPk: this.splitPk,
+            targetColumns: this.targetColumns,
+            jobSpeedChannel: this.jobSpeedChannel,
+            batchSize: this.batchSize,
+            isDataxSqlStatement: this.isDataxSqlStatement,
+            sourceTable: this.sourceTable,
+            sourceColumns: this.sourceColumns
           })
           return true
         }
@@ -382,7 +624,15 @@
           jobSpeedByte: this.jobSpeedByte * 1024,
           jobSpeedRecord: this.jobSpeedRecord,
           preStatements: this.preStatements,
-          postStatements: this.postStatements
+          postStatements: this.postStatements,
+          isSplit: this.isSplit,
+          splitPk: this.splitPk,
+          targetColumns: this.targetColumns,
+          jobSpeedChannel: this.jobSpeedChannel,
+          batchSize: this.batchSize,
+          isDataxSqlStatement: this.isDataxSqlStatement,
+          sourceTable: this.sourceTable,
+          sourceColumns: this.sourceColumns
         });
       },
       _destroyEditor () {
@@ -419,6 +669,14 @@
           this.jobSpeedRecord = o.params.jobSpeedRecord || 0
           this.preStatements = o.params.preStatements || []
           this.postStatements = o.params.postStatements || []
+          this.isSplit = o.params.isSplit || false
+          this.splitPk = o.params.splitPk || ''
+          this.targetColumns = o.params.targetColumns || []
+          this.jobSpeedChannel = o.params.jobSpeedChannel || 1
+          this.batchSize = o.params.batchSize || 1024
+          this.isDataxSqlStatement = o.params.isDataxSqlStatement || false
+          this.sourceTable = o.params.sourceTable || ''
+          this.sourceColumns = o.params.sourceColumns || []
         } else {
           this.customConfig = 1
           this.enable = true
@@ -433,9 +691,11 @@
           this._handlerJsonEditor()
         }, 350)
       } else {
-        setTimeout(() => {
-          this._handlerEditor()
-        }, 350)
+        if(this.isDataxSqlStatement){
+          setTimeout(() => {
+            this._handlerEditor()
+          }, 350)
+        }
       }
     },
     destroyed () {
@@ -468,10 +728,19 @@
           jobSpeedByte: this.jobSpeedByte * 1024,
           jobSpeedRecord: this.jobSpeedRecord,
           preStatements: this.preStatements,
-          postStatements: this.postStatements
+          postStatements: this.postStatements,
+          isSplit: this.isSplit,
+          splitPk: this.splitPk,
+          targetColumns: this.targetColumns,
+          jobSpeedChannel: this.jobSpeedChannel,
+          batchSize: this.batchSize,
+          isDataxSqlStatement: this.isDataxSqlStatement,
+          sourceTable: this.sourceTable,
+          sourceColumns: this.sourceColumns,
+          sql: this.sql
         }
       }
     },
-    components: { mListBox, mDatasource, mLocalParams, mStatementList, mSelectInput }
+    components: { mListBox, mDatasource, mLocalParams, mLocalColumns, mStatementList, mSelectInput }
   }
 </script>

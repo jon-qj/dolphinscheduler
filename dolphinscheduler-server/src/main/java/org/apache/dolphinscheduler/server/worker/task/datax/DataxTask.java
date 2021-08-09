@@ -21,6 +21,7 @@ import org.apache.dolphinscheduler.common.Constants;
 import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.DbType;
 import org.apache.dolphinscheduler.common.enums.Flag;
+import org.apache.dolphinscheduler.common.process.Column;
 import org.apache.dolphinscheduler.common.process.Property;
 import org.apache.dolphinscheduler.common.task.AbstractParameters;
 import org.apache.dolphinscheduler.common.task.datax.DataxParameters;
@@ -243,7 +244,13 @@ public class DataxTask extends AbstractTask {
 
         List<JSONObject> readerConnArr = new ArrayList<>();
         JSONObject readerConn = new JSONObject();
-        readerConn.put("querySql", new String[] {dataXParameters.getSql()});
+
+        boolean isDataxSqlStatement = dataXParameters.isDataxSqlStatement();
+        if(isDataxSqlStatement){
+            readerConn.put("querySql", new String[] {dataXParameters.getSql()});
+        }else {
+            readerConn.put("table",new String[]{dataXParameters.getSourceTable()});
+        }
         readerConn.put("jdbcUrl", new String[] {dataSourceCfg.getJdbcUrl()});
         readerConnArr.add(readerConn);
 
@@ -251,6 +258,12 @@ public class DataxTask extends AbstractTask {
         readerParam.put("username", dataSourceCfg.getUser());
         readerParam.put("password", dataSourceCfg.getPassword());
         readerParam.put("connection", readerConnArr);
+        if(!isDataxSqlStatement){
+            readerParam.put("column",parseColumns(dataXParameters.getSourceColumns()));
+            if(dataXParameters.isSplit()){
+                readerParam.put("splitPk", dataXParameters.getSplitPk());
+            }
+        }
 
         JSONObject reader = new JSONObject();
         reader.put("name", DataxUtils.getReaderPluginName(DbType.of(dataxTaskExecutionContext.getSourcetype())));
@@ -265,10 +278,18 @@ public class DataxTask extends AbstractTask {
         JSONObject writerParam = new JSONObject();
         writerParam.put("username", dataTargetCfg.getUser());
         writerParam.put("password", dataTargetCfg.getPassword());
-        writerParam.put("column",
-            parsingSqlColumnNames(DbType.of(dataxTaskExecutionContext.getSourcetype()),
+
+        if(isDataxSqlStatement){
+            writerParam.put("column",parsingSqlColumnNames(DbType.of(dataxTaskExecutionContext.getSourcetype()),
                     DbType.of(dataxTaskExecutionContext.getTargetType()),
-                    dataSourceCfg, dataXParameters.getSql()));
+                    dataSourceCfg,
+                    dataXParameters.getSql()));
+        }else {
+            writerParam.put("column",parseColumns(dataXParameters.getTargetColumns()));
+        }
+
+        writerParam.put("batchSize",dataXParameters.getBatchSize());
+
         writerParam.put("connection", writerConnArr);
 
         if (CollectionUtils.isNotEmpty(dataXParameters.getPreStatements())) {
@@ -299,7 +320,12 @@ public class DataxTask extends AbstractTask {
      */
     private JSONObject buildDataxJobSettingJson() {
         JSONObject speed = new JSONObject();
-        speed.put("channel", DATAX_CHANNEL_COUNT);
+
+        if(dataXParameters.isSplit() && dataXParameters.getJobSpeedChannel()>1){
+            speed.put("channel", dataXParameters.getJobSpeedChannel());
+        }else {
+            speed.put("channel", DATAX_CHANNEL_COUNT);
+        }
 
         if (dataXParameters.getJobSpeedByte() > 0) {
             speed.put("byte", dataXParameters.getJobSpeedByte());
@@ -322,8 +348,12 @@ public class DataxTask extends AbstractTask {
 
     private JSONObject buildDataxCoreJson() {
         JSONObject speed = new JSONObject();
-        speed.put("channel", DATAX_CHANNEL_COUNT);
 
+        if(dataXParameters.isSplit() && dataXParameters.getJobSpeedChannel()>1){
+            speed.put("channel", dataXParameters.getJobSpeedChannel());
+        }else {
+            speed.put("channel", DATAX_CHANNEL_COUNT);
+        }
         if (dataXParameters.getJobSpeedByte() > 0) {
             speed.put("byte", dataXParameters.getJobSpeedByte());
         }
@@ -533,6 +563,18 @@ public class DataxTask extends AbstractTask {
         if (obj == null) {
             throw new RuntimeException(message);
         }
+    }
+
+    private String[] parseColumns(List<Column> columns){
+        String [] tmpArr =null;
+        if(CollectionUtils.isNotEmpty(columns)){
+            int size = columns.size();
+            tmpArr = new String[size];
+            for (int i = 0; i < size; i++) {
+                tmpArr[i] = columns.get(i).getName();
+            }
+        }
+        return tmpArr;
     }
 
 }

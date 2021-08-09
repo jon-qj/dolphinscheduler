@@ -253,7 +253,7 @@
       </div>
 
       <m-list-box>
-        <div slot="text">{{$t('Use Split Pk')}}</div>
+        <div slot="text">{{$t('Use SplitPk')}}</div>
         <div slot="content">
           <label class="label-box">
             <div style="padding-top: 5px;">
@@ -264,9 +264,9 @@
       </m-list-box>
       <div v-if="isSplit">
         <m-list-box>
-          <div slot="text">{{$t('Split Pk Column')}}</div>
+          <div slot="text">{{$t('SplitPk Column')}}</div>
           <div slot="content">
-            <x-select ref="clearSelect"
+            <x-select ref="clearFlinkxSelect"
                       style="width: 160px;"
                       :disabled="isDetails"
                       @on-change="_onSplitPkChange"
@@ -552,12 +552,12 @@
         return true
       },
 
-      _checkIntegralType(type){
+      _checkFlinkxIntegralType(type){
         const index = integralType.indexOf(type)
         if(index === -1){
           this.$message.error(`${i18n.$t('This column type must be integral type')}`)
           this.splitPk =''
-          this.$refs.clearSelect.setSelected('')
+          this.$refs.clearFlinkxSelect.setSelected('')
           return false
         }else {
           return true
@@ -587,7 +587,7 @@
           const label = val['label']
           arr.filter((item,index)=>{
             if(item['name']===label){
-              if(this._checkIntegralType(item['type'])){
+              if(this._checkFlinkxIntegralType(item['type'])){
                 this.splitPk = val['label']
               }
               return true
@@ -803,9 +803,14 @@
             }
 
             if(this.jobSpeedChannel<=1){
-              this.$message.warning(`${i18n.$t('If you use SplitPk,please be sure the number of job channel is bigger than 1')}`)
+              this.$message.warning(`${i18n.$t('If you use SplitPk,please be sure the job channel is bigger than 1')}`)
               return false
             }
+          }
+
+          if(this.batchSize<1){
+            this.$message.warning(`${i18n.$t('Please be sure the batch size is not smaller than 1')}`)
+            return false
           }
 
           // storage
