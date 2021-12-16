@@ -27,6 +27,10 @@
     <name>${project.artifactId}</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <java-jwt.version>3.11.0</java-jwt.version>
+    </properties>
+
     <dependencies>
         <!-- dolphinscheduler -->
         <dependency>
@@ -38,6 +42,12 @@
             <groupId>org.apache.dolphinscheduler</groupId>
             <artifactId>dolphinscheduler-datasource-all</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${java-jwt.version}</version>
         </dependency>
 
         <!--springboot-->

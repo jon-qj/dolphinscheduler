@@ -515,8 +515,8 @@
             this.isShowPrincipal = res
             if ((value === 'HIVE' || value === 'SPARK') && this.isShowPrincipal === true) {
               // TODO: follow-up support for multiple kerberos
-              // this.showPrincipal = false
               this.showPrincipal = true
+              // this.showPrincipal = false
             } else {
               this.showPrincipal = true
             }

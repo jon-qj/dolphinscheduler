@@ -224,6 +224,7 @@ public class UsersServiceImpl extends BaseServiceImpl implements UsersService {
         user.setEmail(email);
         // create general users, administrator users are currently built-in
         user.setUserType(userType);
+        user.setState(1);
         user.setCreateTime(now);
         user.setUpdateTime(now);
         user.setQueue("");

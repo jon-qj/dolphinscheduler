@@ -17,13 +17,16 @@
 
 package org.apache.dolphinscheduler.api.security.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.dolphinscheduler.api.enums.Status;
 import org.apache.dolphinscheduler.api.security.Authenticator;
 import org.apache.dolphinscheduler.api.service.SessionService;
 import org.apache.dolphinscheduler.api.service.UsersService;
+import org.apache.dolphinscheduler.api.utils.JwtUtil;
 import org.apache.dolphinscheduler.api.utils.Result;
 import org.apache.dolphinscheduler.common.Constants;
 import org.apache.dolphinscheduler.common.enums.Flag;
+import org.apache.dolphinscheduler.common.enums.UserType;
 import org.apache.dolphinscheduler.dao.entity.Session;
 import org.apache.dolphinscheduler.dao.entity.User;
 
@@ -87,13 +90,26 @@ public abstract class AbstractAuthenticator implements Authenticator {
 
     @Override
     public User getAuthUser(HttpServletRequest request) {
+        User user = null;
         Session session = sessionService.getSession(request);
         if (session == null) {
             logger.info("session info is null ");
-            return null;
+            String username = JwtUtil.getUserNameTokenByRequest(request);
+            if(StringUtils.isNotEmpty(username)){
+                user = userService.getUserByUserName(username);
+                if(user == null){
+                    logger.info("token info is null ");
+                    String email = username + "@yintech.cn";
+                    user = userService.createUser(UserType.GENERAL_USER, username, email);
+                }
+            }else {
+                return null;
+            }
+        } else {
+            //get user object from session
+            user = userService.queryUser(session.getUserId());
         }
-        //get user object from session
-        return userService.queryUser(session.getUserId());
+        return user;
     }
 
 }

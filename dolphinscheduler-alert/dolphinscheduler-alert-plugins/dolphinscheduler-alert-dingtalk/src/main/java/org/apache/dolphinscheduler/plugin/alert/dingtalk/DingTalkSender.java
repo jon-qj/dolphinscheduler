@@ -63,7 +63,7 @@ public final class DingTalkSender {
         if (Boolean.TRUE.equals(enableProxy)) {
             port = Integer.parseInt(config.get(DingTalkParamsConstants.NAME_DING_TALK_PORT));
             proxy = config.get(DingTalkParamsConstants.NAME_DING_TALK_PROXY);
-            user = config.get(DingTalkParamsConstants.DING_TALK_USER);
+            user = config.get(DingTalkParamsConstants.NAME_DING_TALK_USER);
             password = config.get(DingTalkParamsConstants.NAME_DING_TALK_PASSWORD);
         }
     }

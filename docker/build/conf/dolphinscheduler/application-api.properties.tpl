@@ -45,7 +45,16 @@ spring.messages.encoding=UTF-8
 spring.messages.basename=i18n/messages
 
 # Authentication types (supported types: PASSWORD)
-security.authentication.type=PASSWORD
+# security.authentication.type=PASSWORD
+security.authentication.type=${SECURITY_AUTHENTICATION_TYPE}
+ldap.user.admin=${LDAP_USER_ADMIN}
+ldap.urls=${LDAP_URLS}
+ldap.base.dn=${LDAP_BASE_DN}
+ldap.username=${LDAP_USERNAME}
+ldap.password=${LDAP_PASSWORD}
+ldap.user.identity.attribute=${LDAP_USER_IDENTITY_ATTRIBUTE}
+ldap.user.email.attribute=${LDAP_USER_EMAIL_ATTRIBUTE}
+ldap.user.domain=${LDAP_USER_DOMAIN}
 
 # Traffic control, if you turn on this config, the maximum number of request/s will be limited.
 # global max request number per second

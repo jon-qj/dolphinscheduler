@@ -266,13 +266,13 @@ public final class MailSender {
         CommandMap.setDefaultCommandMap(mc);
 
         Properties props = new Properties();
-        props.setProperty(MailParamsConstants.MAIL_SMTP_HOST, mailSmtpHost);
-        props.setProperty(MailParamsConstants.MAIL_SMTP_PORT, mailSmtpPort);
-        props.setProperty(MailParamsConstants.MAIL_SMTP_AUTH, enableSmtpAuth);
+        props.setProperty(EmailConstants.MAIL_SMTP_HOST, mailSmtpHost);
+        props.setProperty(EmailConstants.MAIL_SMTP_PORT, mailSmtpPort);
+        props.setProperty(EmailConstants.MAIL_SMTP_AUTH, enableSmtpAuth);
         props.setProperty(EmailConstants.MAIL_TRANSPORT_PROTOCOL, mailProtocol);
-        props.setProperty(MailParamsConstants.MAIL_SMTP_STARTTLS_ENABLE, mailUseStartTLS);
-        props.setProperty(MailParamsConstants.MAIL_SMTP_SSL_ENABLE, mailUseSSL);
-        props.setProperty(MailParamsConstants.MAIL_SMTP_SSL_TRUST, sslTrust);
+        props.setProperty(EmailConstants.MAIL_SMTP_STARTTLS_ENABLE, mailUseStartTLS);
+        props.setProperty(EmailConstants.MAIL_SMTP_SSL_ENABLE, mailUseSSL);
+        props.setProperty(EmailConstants.MAIL_SMTP_SSL_TRUST, sslTrust);
 
         Authenticator auth = new Authenticator() {
             @Override

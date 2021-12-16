@@ -22,6 +22,18 @@ public final class EmailConstants {
 
     public static final String MAIL_TRANSPORT_PROTOCOL = "mail.transport.protocol";
 
+    public static final String MAIL_SMTP_HOST = "mail.smtp.host";
+
+    public static final String MAIL_SMTP_PORT = "mail.smtp.port";
+
+    public static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
+
+    public static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+
+    public static final String MAIL_SMTP_SSL_ENABLE = "mail.smtp.ssl.enable";
+
+    public static final String MAIL_SMTP_SSL_TRUST = "mail.smtp.ssl.trust";
+
     public static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
 
     public static final int NUMBER_1000 = 1000;

@@ -128,4 +128,14 @@ public interface DataSourceService {
      * @return authorized result code
      */
     Map<String, Object> authedDatasource(User loginUser, Integer userId);
+
+    /**
+     * query datasource columns By table name
+     *
+     * @param loginUser login user
+     * @param id        datasource id
+     * @param table     table name
+     * @return column info
+     */
+    Map<String, Object> queryDatasourceColumnsByTable(User loginUser, Integer id, String table);
 }

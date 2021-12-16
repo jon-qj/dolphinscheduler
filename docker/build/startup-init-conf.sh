@@ -82,6 +82,7 @@ export JAVA_HOME=${JAVA_HOME:-"/usr/local/openjdk-8"}
 export HIVE_HOME=${HIVE_HOME:-"/opt/soft/hive"}
 export FLINK_HOME=${FLINK_HOME:-"/opt/soft/flink"}
 export DATAX_HOME=${DATAX_HOME:-"/opt/soft/datax"}
+export FLINKX_HOME=${FLINKX_HOME:-"/opt/soft/flinkx"}
 
 #============================================================================
 # Master Server
@@ -118,6 +119,16 @@ export ALERT_SERVER_OPTS=${ALERT_SERVER_OPTS:-"-Xms512m -Xmx512m -Xmn256m"}
 # Api Server
 #============================================================================
 export API_SERVER_OPTS=${API_SERVER_OPTS:-"-Xms512m -Xmx512m -Xmn256m"}
+# LDAP
+export SECURITY_AUTHENTICATION_TYPE=${SECURITY_AUTHENTICATION_TYPE:-"LDAP"}
+export LDAP_USER_ADMIN=${LDAP_USER_ADMIN:-""}
+export LDAP_URLS=${LDAP_URLS:-""}
+export LDAP_BASE_DN=${LDAP_BASE_DN:-""}
+export LDAP_USERNAME=${LDAP_USERNAME:-""}
+export LDAP_PASSWORD=${LDAP_PASSWORD:-""}
+export LDAP_USER_IDENTITY_ATTRIBUTE=${LDAP_USER_IDENTITY_ATTRIBUTE:-""}
+export LDAP_USER_EMAIL_ATTRIBUTE=${LDAP_USER_EMAIL_ATTRIBUTE:-""}
+export LDAP_USER_DOMAIN=${LDAP_USER_DOMAIN:-""}
 
 #============================================================================
 # Logger Server

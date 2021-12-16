@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.api.security.impl.ldap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.common.enums.UserType;
 
 import java.util.Properties;
@@ -63,6 +64,9 @@ public class LdapService {
     @Value("${ldap.user.email.attribute:null}")
     private String ldapEmailAttribute;
 
+    @Value("${ldap.user.domain:null}")
+    private String ldapUserDomain;
+
     /***
      * get user type by configured admin userId
      * @param userId login userId
@@ -85,9 +89,10 @@ public class LdapService {
             //Connect to the LDAP server and Authenticate with a service user of whom we know the DN and credentials
             LdapContext ctx = new InitialLdapContext(searchEnv, null);
             SearchControls sc = new SearchControls();
-            sc.setReturningAttributes(new String[]{ldapEmailAttribute});
+//            sc.setReturningAttributes(new String[]{ldapEmailAttribute});
             sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            String searchFilter = String.format("(%s=%s)", ldapUserIdentifyingAttribute, userId);
+            String realUid = getRealUid(userId);
+            String searchFilter = String.format("(%s=%s)", ldapUserIdentifyingAttribute, realUid);
             //Search for the user you want to authenticate, search him with some attribute
             NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, searchFilter, sc);
             if (results.hasMore()) {
@@ -101,7 +106,7 @@ public class LdapService {
                     try {
                         new InitialDirContext(searchEnv);
                     } catch (Exception e) {
-                        logger.warn("invalid ldap credentials or ldap search error", e);
+                        logger.warn("invalid ldap credentials or ldap search error: {}", e.getMessage());
                         return null;
                     }
                     Attribute attr = (Attribute) attrs.next();
@@ -127,7 +132,17 @@ public class LdapService {
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
         env.put(Context.SECURITY_PRINCIPAL, ldapSecurityPrincipal);
         env.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
-        env.put(Context.PROVIDER_URL, ldapUrls);
+        env.put(Context.PROVIDER_URL,"ldap://"+ldapUrls);
         return env;
+    }
+
+    private String getRealUid(String uid){
+        String value = uid;
+        if (StringUtils.isNotBlank(uid)) {
+            if (!uid.contains("@")) {
+                value = uid + ldapUserDomain;
+            }
+        }
+        return value;
     }
 }

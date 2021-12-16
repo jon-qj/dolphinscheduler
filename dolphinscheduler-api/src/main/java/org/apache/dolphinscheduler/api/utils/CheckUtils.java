@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 

@@ -24,6 +24,7 @@ import org.apache.dolphinscheduler.common.enums.UdfType;
 import org.apache.dolphinscheduler.common.process.ResourceInfo;
 import org.apache.dolphinscheduler.common.task.AbstractParameters;
 import org.apache.dolphinscheduler.common.task.datax.DataxParameters;
+import org.apache.dolphinscheduler.common.task.flinkx.FlinkxParameters;
 import org.apache.dolphinscheduler.common.task.procedure.ProcedureParameters;
 import org.apache.dolphinscheduler.common.task.sql.SqlParameters;
 import org.apache.dolphinscheduler.common.task.sqoop.SqoopParameters;
@@ -44,6 +45,7 @@ import org.apache.dolphinscheduler.service.process.ProcessService;
 import org.apache.dolphinscheduler.service.queue.entity.TaskExecutionContext;
 import org.apache.dolphinscheduler.spi.enums.ResourceType;
 import org.apache.dolphinscheduler.spi.task.request.DataxTaskExecutionContext;
+import org.apache.dolphinscheduler.spi.task.request.FlinkxTaskExecutionContext;
 import org.apache.dolphinscheduler.spi.task.request.ProcedureTaskExecutionContext;
 import org.apache.dolphinscheduler.spi.task.request.SQLTaskExecutionContext;
 import org.apache.dolphinscheduler.spi.task.request.SqoopTaskExecutionContext;
@@ -186,6 +188,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
         DataxTaskExecutionContext dataxTaskExecutionContext = new DataxTaskExecutionContext();
         ProcedureTaskExecutionContext procedureTaskExecutionContext = new ProcedureTaskExecutionContext();
         SqoopTaskExecutionContext sqoopTaskExecutionContext = new SqoopTaskExecutionContext();
+        FlinkxTaskExecutionContext flinkxTaskExecutionContext = new FlinkxTaskExecutionContext();
 
         // SQL task
         if (TaskType.SQL.getDesc().equalsIgnoreCase(taskInstance.getTaskType())) {
@@ -206,6 +209,11 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
             setSqoopTaskRelation(sqoopTaskExecutionContext, taskInstance);
         }
 
+        // flinkx task
+        if(TaskType.FLINKX.getDesc().equalsIgnoreCase(taskInstance.getTaskType())){
+            setFlinkxTaskRelation(flinkxTaskExecutionContext,taskInstance);
+        }
+
         return TaskExecutionContextBuilder.get()
                 .buildTaskInstanceRelatedInfo(taskInstance)
                 .buildTaskDefinitionRelatedInfo(taskInstance.getTaskDefine())
@@ -215,6 +223,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
                 .buildDataxTaskRelatedInfo(dataxTaskExecutionContext)
                 .buildProcedureTaskRelatedInfo(procedureTaskExecutionContext)
                 .buildSqoopTaskRelatedInfo(sqoopTaskExecutionContext)
+                .buildFlinkxTaskRelatedInfo(flinkxTaskExecutionContext)
                 .create();
     }
 
@@ -372,5 +381,25 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
         }
 
         return resourcesMap;
+    }
+
+    private void setFlinkxTaskRelation(FlinkxTaskExecutionContext flinkxTaskExecutionContext, TaskInstance taskInstance){
+        FlinkxParameters flinkxParameters = JSONUtils.parseObject(taskInstance.getTaskParams(), FlinkxParameters.class);
+
+        DataSource dbSource = processService.findDataSourceById(flinkxParameters.getDataSource());
+        DataSource dbTarget = processService.findDataSourceById(flinkxParameters.getDataTarget());
+
+        if (dbSource != null) {
+            flinkxTaskExecutionContext.setDataSourceId(flinkxParameters.getDataSource());
+            flinkxTaskExecutionContext.setSourcetype(dbSource.getType().getCode());
+            flinkxTaskExecutionContext.setSourceConnectionParams(dbSource.getConnectionParams());
+        }
+
+        if (dbTarget != null) {
+            flinkxTaskExecutionContext.setDataTargetId(flinkxParameters.getDataTarget());
+            flinkxTaskExecutionContext.setTargetType(dbTarget.getType().getCode());
+            flinkxTaskExecutionContext.setTargetConnectionParams(dbTarget.getConnectionParams());
+        }
+
     }
 }

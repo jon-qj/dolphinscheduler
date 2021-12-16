@@ -36,10 +36,11 @@ public class StandaloneServer {
         System.setProperty("registry.servers", server.getConnectString());
 
         new SpringApplicationBuilder(
-            ApiApplicationServer.class,
-            MasterServer.class,
-            WorkerServer.class,
-            AlertServer.class
-        ).profiles("master", "worker", "api", "alert", "h2", "standalone").run(args);
+            ApiApplicationServer.class
+//            MasterServer.class,
+//            WorkerServer.class,
+//            AlertServer.class
+//        ).profiles("master", "worker", "api", "alert", "h2", "standalone").run(args);
+        ).profiles("api","mysql").run(args);
     }
 }

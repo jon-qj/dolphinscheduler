@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
 public class SecurityConfig {
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
-    @Value("${security.authentication.type:PASSWORD}")
+    @Value("${security.authentication.type:LDAP}")
     private String type;
 
     private AutowireCapableBeanFactory beanFactory;
@@ -48,7 +48,7 @@ public class SecurityConfig {
     private void setAuthenticationType(String type) {
         if (StringUtils.isBlank(type)) {
             logger.info("security.authentication.type configuration is empty, the default value 'PASSWORD'");
-            this.authenticationType = AuthenticationType.PASSWORD;
+            this.authenticationType = AuthenticationType.LDAP;
             return;
         }
 

@@ -23,6 +23,7 @@ import static org.apache.dolphinscheduler.api.enums.Status.CONNECT_DATASOURCE_FA
 import static org.apache.dolphinscheduler.api.enums.Status.CREATE_DATASOURCE_ERROR;
 import static org.apache.dolphinscheduler.api.enums.Status.DELETE_DATA_SOURCE_FAILURE;
 import static org.apache.dolphinscheduler.api.enums.Status.KERBEROS_STARTUP_STATE;
+import static org.apache.dolphinscheduler.api.enums.Status.QUERY_COLUMNS_BY_TABLE_NAME_ERROR;
 import static org.apache.dolphinscheduler.api.enums.Status.QUERY_DATASOURCE_ERROR;
 import static org.apache.dolphinscheduler.api.enums.Status.UNAUTHORIZED_DATASOURCE;
 import static org.apache.dolphinscheduler.api.enums.Status.UPDATE_DATASOURCE_ERROR;
@@ -335,4 +336,28 @@ public class DataSourceController extends BaseController {
         // if upload resource is HDFS and kerberos startup is true , else false
         return success(Status.SUCCESS.getMsg(), CommonUtils.getKerberosStartupState());
     }
+
+    /**
+     * query data source columns
+     * @param loginUser loginUser
+     * @param id id
+     * @param table table
+     * @return data source columns
+     */
+    @ApiOperation(value = "queryDatasourceColumnsByTable",notes = "QUERY_DATASOURCE_COLUMNS_BY_TABLE_NOTES")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "DATA_SOURCE_ID", required = true, dataType = "Int", example = "100"),
+            @ApiImplicitParam(name = "table", value = "DATA_SOURCE_TABLE", required = true, dataType = "String", example = "t_ds_project")
+    })
+    @PostMapping(value="/list-columns")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(QUERY_COLUMNS_BY_TABLE_NAME_ERROR)
+    @AccessLogAnnotation(ignoreRequestArgs = "loginUser")
+    public Result queryDatasourceColumnsByTable(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+                                                @RequestParam("id") int id,
+                                                @RequestParam(value = "table") String table){
+        Map<String,Object> result = dataSourceService.queryDatasourceColumnsByTable(loginUser, id, table);
+        return returnDataList(result);
+    }
+
 }

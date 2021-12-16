@@ -17,6 +17,10 @@
 
 package org.apache.dolphinscheduler.api.utils;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.dolphinscheduler.common.Constants;
+
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
@@ -25,6 +29,12 @@ import java.util.regex.Pattern;
 public class RegexUtils {
 
     private static final String LINUX_USERNAME_PATTERN = "[a-z_][a-z\\d_]{0,30}";
+
+    /**
+     * check sql injection
+     */
+    public static final String SQL_INJECTION_PATTERN ="(?<=[\\s|\\(]|^)(select|update|union|and|or|delete|insert|trancate|char|into|substr|ascii|declare|exec|count|master|drop|execute)(?=([\\s|\\)])|$)";
+
 
     private RegexUtils() {
     }
@@ -45,6 +55,15 @@ public class RegexUtils {
             return str.replaceAll("[\n|\r|\t]", "_");
         }
         return null;
+    }
+
+    public static boolean checkSqlInjection(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return true;
+        }
+        String lower = name.toLowerCase(Locale.ROOT);
+        Pattern pattern =  Pattern.compile(SQL_INJECTION_PATTERN,Pattern.CASE_INSENSITIVE);
+        return pattern.matcher(lower).find();
     }
 
 }

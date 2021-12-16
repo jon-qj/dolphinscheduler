@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import com.zaxxer.hikari.HikariDataSource;
 
+import javax.xml.crypto.Data;
+
 /**
  * Jdbc Data Source Provider
  */
@@ -48,7 +50,8 @@ public class JdbcDataSourceProvider {
         loaderJdbcDriver(classLoader, properties, dbType);
 
         dataSource.setDriverClassName(properties.getDriverClassName());
-        dataSource.setJdbcUrl(properties.getJdbcUrl());
+//        dataSource.setJdbcUrl(properties.getJdbcUrl());
+        dataSource.setJdbcUrl(DatasourceUtil.getJdbcUrl(dbType,properties));
         dataSource.setUsername(properties.getUser());
         dataSource.setPassword(PasswordUtils.decodePassword(properties.getPassword()));
 
@@ -67,13 +70,14 @@ public class JdbcDataSourceProvider {
     /**
      * @return One Session Jdbc DataSource
      */
-    public static HikariDataSource createOneSessionJdbcDataSource(BaseConnectionParam properties) {
+    public static HikariDataSource createOneSessionJdbcDataSource(DbType dbType,BaseConnectionParam properties) {
         logger.info("Creating OneSession HikariDataSource pool for maxActive:{}", PropertyUtils.getInt(Constants.SPRING_DATASOURCE_MAX_ACTIVE, 50));
 
         HikariDataSource dataSource = new HikariDataSource();
 
         dataSource.setDriverClassName(properties.getDriverClassName());
-        dataSource.setJdbcUrl(properties.getJdbcUrl());
+//        dataSource.setJdbcUrl(properties.getJdbcUrl());
+        dataSource.setJdbcUrl(DatasourceUtil.getJdbcUrl(dbType,properties));
         dataSource.setUsername(properties.getUser());
         dataSource.setPassword(PasswordUtils.decodePassword(properties.getPassword()));
 
